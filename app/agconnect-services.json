@@ -1,0 +1,27 @@
+{
+	"agcgw":{
+		"backurl":"connect-dre.dbankcloud.cn",
+		"url":"connect-dre.hispace.hicloud.com"
+	},
+	"client":{
+		"cp_id":"260086000020090676",
+		"product_id":"736430079244450337",
+		"client_id":"362189397140964416",
+		"client_secret":"1DA4ED9BFDEF0880635702454E96F565764663B9D0C3E80431BA1369C2858CE9",
+		"app_id":"102217657",
+		"package_name":"com.awareness.music",
+		"api_key":"CV7km547OZl2KHzE0cbwjcg98Wh7Gyy+VVK1KYz6IRU8G5wANibQ40CUBte01f9OtlmfoqYw92hpGKd/sUPAZSOp1NY6"
+	},
+	"service":{
+		"analytics":{
+			"collector_url":"datacollector-dre.dt.hicloud.com,datacollector-dre.dt.dbankcloud.cn",
+			"resource_id":"p1",
+			"channel_id":""
+		},
+		"ml":{
+			"mlservice_url":"ml-api-dre.ai.dbankcloud.com,ml-api-dre.ai.dbankcloud.cn"
+		}
+	},
+	"region":"DE",
+	"configuration_version":"1.0"
+}
