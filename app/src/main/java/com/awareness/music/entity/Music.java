@@ -1,4 +1,4 @@
-package com.awareness.music.model;
+package com.awareness.music.entity;
 
 import android.content.Context;
 import android.media.MediaMetadataRetriever;

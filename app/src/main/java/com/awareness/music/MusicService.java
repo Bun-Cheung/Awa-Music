@@ -3,26 +3,25 @@ package com.awareness.music;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
-import androidx.media.session.MediaButtonReceiver;
 
-import com.awareness.music.model.Music;
+import com.awareness.music.entity.Music;
+import com.awareness.music.livedata.PositionLiveData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,6 +63,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
             setMetadata(mPlayList.get(0));
             mIsFirstStart = false;
             updateNotification();
+            PositionLiveData.getInstance().checkPosition(mMediaPlayer);
         }
         return super.onStartCommand(intent, flags, startId);
     }

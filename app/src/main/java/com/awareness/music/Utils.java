@@ -3,10 +3,9 @@ package com.awareness.music;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -19,6 +18,7 @@ import androidx.media.session.MediaButtonReceiver;
 public class Utils {
     private static final String FOREGROUND_MUSIC_CHANNEL = "Music control channel";
     private static final String AWARENESS_CHANNEL = "Awareness channel";
+    private static final String SHARED_PREFERENCE_NAME = "AwaMusic SharedPreference";
 
     public static String formatMS(long ms) {
         long oneHourMS = 60 * 60 * 1000;
@@ -65,6 +65,17 @@ public class Utils {
         }
     }
 
+    public static Notification buildAwarenessNotification(Context context, String title,
+                                                          String content, PendingIntent intent) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, AWARENESS_CHANNEL);
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setContentIntent(intent)
+                .setAutoCancel(true);
+        return builder.build();
+    }
+
     public static Notification buildMusicNotification(Context context, MediaSessionCompat session) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, FOREGROUND_MUSIC_CHANNEL);
         MediaMetadataCompat mediaMetadata = session.getController().getMetadata();
@@ -96,5 +107,17 @@ public class Utils {
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle().
                 setMediaSession(session.getSessionToken()).setShowActionsInCompactView(0, 1, 2));
         return builder.build();
+    }
+
+    public static boolean getSPData(Context context, String key) {
+        SharedPreferences sp = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        return sp.getBoolean(key, true);
+    }
+
+    public static void setSPData(Context context, String key, boolean value) {
+        SharedPreferences sp = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
     }
 }

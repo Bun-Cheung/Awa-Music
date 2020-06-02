@@ -3,12 +3,10 @@ package com.awareness.music;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.media.session.MediaButtonReceiver;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -24,8 +22,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.awareness.music.livedata.PositionLiveData;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String IS_FIRST_USE_KEY = "key_isFirstUse";
     private final String TAG = getClass().getSimpleName();
     private ImageView mIvCover;
     private TextView mTvMusicTitle;
@@ -36,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SeekBar mSeekbar;
     private MediaBrowserCompat mMediaBrowser;
     private MediaControllerCompat mMediaController;
-    private boolean mIsPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,18 +44,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         initView();
         Utils.createNotificationChannel(this);
-        showFirstUseDialog();
+        if (Utils.getSPData(this, IS_FIRST_USE_KEY)) {
+            showFirstUseDialog();
+            Utils.setSPData(this, IS_FIRST_USE_KEY, false);
+        }
         mMediaBrowser = new MediaBrowserCompat(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
         mMediaBrowser.connect();
+        PositionLiveData.getInstance().getCurrentPosition().observe(this, integer -> {
+            mSeekbar.setProgress(integer);
+        });
+    }
 
+    @Override
+    public void setTheme(int resId) {
+        super.setTheme(resId);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMediaController.getTransportControls().stop();
-        mMediaBrowser.disconnect();
+        if (mMediaController != null) {
+            mMediaController.getTransportControls().stop();
+        }
+        if (mMediaBrowser != null) {
+            mMediaBrowser.disconnect();
+        }
     }
 
     private void initView() {
@@ -82,7 +96,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mMediaController.getTransportControls().seekTo(progress);
+                if (fromUser) {
+                    mMediaController.getTransportControls().seekTo(progress);
+                }
                 mTvMusicCurrentProgress.setText(Utils.formatMS(progress));
             }
 
@@ -126,12 +142,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case PlaybackStateCompat.STATE_PAUSED:
                     mBtnPlay.setImageResource(R.drawable.ic_play);
                     mSeekbar.setProgress((int) state.getPosition());
-                    mIsPlaying = false;
                     break;
                 case PlaybackStateCompat.STATE_PLAYING:
                     mBtnPlay.setImageResource(R.drawable.ic_pause);
                     mSeekbar.setProgress((int) state.getPosition());
-                    mIsPlaying = true;
                     break;
                 default:
                     break;
@@ -162,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
             case R.id.btn_play:
-                if (mIsPlaying) {
+                if (mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                     mMediaController.getTransportControls().pause();
                 } else {
                     mMediaController.getTransportControls().play();
