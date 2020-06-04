@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -21,7 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
 
 import com.awareness.music.entity.Music;
-import com.awareness.music.livedata.PositionLiveData;
+import com.awareness.music.livedata.MusicPositionLiveData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +40,8 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     @Override
     public void onCreate() {
         super.onCreate();
-        initPlayList();
+        mPlayList = MockData.getMusicList(this);
+        mPlayListLength = mPlayList.size();
         mPlaybackStateCompat = new PlaybackStateCompat.Builder()
                 .setState(PlaybackStateCompat.STATE_NONE, 0, 1.0f)
                 .build();
@@ -63,7 +63,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
             setMetadata(mPlayList.get(0));
             mIsFirstStart = false;
             updateNotification();
-            PositionLiveData.getInstance().checkPosition(mMediaPlayer);
+            MusicPositionLiveData.getInstance().checkPosition(mMediaPlayer);
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -71,6 +71,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     @Override
     public void onDestroy() {
         super.onDestroy();
+        MusicPositionLiveData.getInstance().removeCallback();
         mMediaPlayer.release();
         mMediaPlayer = null;
     }
@@ -203,15 +204,6 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         return true;
     }
 
-    private void initPlayList() {
-        Uri uri1 = resIdToUri(R.raw.mornings);
-        Music music1 = new Music(this, uri1, R.drawable.cover_morning, "morning");
-        Uri uri2 = resIdToUri(R.raw.autumn_sunset);
-        Music music2 = new Music(this, uri2, R.drawable.cover_afternoon, "afternoon");
-        mPlayList.add(music1);
-        mPlayList.add(music2);
-        mPlayListLength = mPlayList.size();
-    }
 
     private void prepareMediaPlayer(Music music) {
         mMediaPlayer.reset();
@@ -244,10 +236,6 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
                 .build();
         mSession.setMetadata(metadata);
-    }
-
-    private Uri resIdToUri(int resId) {
-        return Uri.parse("android.resource://" + getPackageName() + "/" + resId);
     }
 
     private boolean dataSourceHasSet() {

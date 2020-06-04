@@ -6,21 +6,21 @@ import android.os.Looper;
 
 import androidx.lifecycle.MutableLiveData;
 
-public class PositionLiveData {
+public class MusicPositionLiveData {
 
     private MutableLiveData<Integer> currentPosition = new MutableLiveData<>();
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    private PositionLiveData() {
+    private MusicPositionLiveData() {
         currentPosition.postValue(0);
     }
 
-    public static PositionLiveData getInstance() {
+    public static MusicPositionLiveData getInstance() {
         return SingletonHolder.sInstance;
     }
 
     private static class SingletonHolder {
-        private static final PositionLiveData sInstance = new PositionLiveData();
+        private static final MusicPositionLiveData sInstance = new MusicPositionLiveData();
     }
 
     public void checkPosition(MediaPlayer mediaPlayer) {
@@ -35,5 +35,9 @@ public class PositionLiveData {
 
     public MutableLiveData<Integer> getCurrentPosition() {
         return currentPosition;
+    }
+
+    public void removeCallback() {
+        handler.removeCallbacksAndMessages(null);
     }
 }

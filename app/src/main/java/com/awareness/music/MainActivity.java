@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -22,7 +24,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.awareness.music.livedata.PositionLiveData;
+import com.awareness.music.livedata.MusicPositionLiveData;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -44,22 +46,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         initView();
         Utils.createNotificationChannel(this);
-        if (Utils.getSPData(this, IS_FIRST_USE_KEY)) {
+        if (getSPData(IS_FIRST_USE_KEY)) {
             showFirstUseDialog();
-            Utils.setSPData(this, IS_FIRST_USE_KEY, false);
+            setSPData(IS_FIRST_USE_KEY, false);
         }
         mMediaBrowser = new MediaBrowserCompat(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
         mMediaBrowser.connect();
-        PositionLiveData.getInstance().getCurrentPosition().observe(this, integer -> {
+        MusicPositionLiveData.getInstance().getCurrentPosition().observe(this, integer -> {
             mSeekbar.setProgress(integer);
         });
     }
 
-    @Override
-    public void setTheme(int resId) {
-        super.setTheme(resId);
-    }
 
     @Override
     protected void onDestroy() {
@@ -205,5 +203,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private boolean getSPData(String key) {
+        SharedPreferences sp = getSharedPreferences(Constant.SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        return sp.getBoolean(key, true);
+    }
+
+    private void setSPData(String key, boolean value) {
+        SharedPreferences sp = getSharedPreferences(Constant.SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
     }
 }

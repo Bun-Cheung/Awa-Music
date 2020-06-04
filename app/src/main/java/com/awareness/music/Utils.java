@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -17,8 +16,6 @@ import androidx.media.session.MediaButtonReceiver;
 
 public class Utils {
     private static final String FOREGROUND_MUSIC_CHANNEL = "Music control channel";
-    private static final String AWARENESS_CHANNEL = "Awareness channel";
-    private static final String SHARED_PREFERENCE_NAME = "AwaMusic SharedPreference";
 
     public static String formatMS(long ms) {
         long oneHourMS = 60 * 60 * 1000;
@@ -58,22 +55,31 @@ public class Utils {
             manager.createNotificationChannel(musicChannel);
 
             CharSequence awaChannelName = "Awareness Notification";
-            NotificationChannel awarenessChannel = new NotificationChannel(AWARENESS_CHANNEL,
+            NotificationChannel awarenessChannel = new NotificationChannel(Constant.AWARENESS_CHANNEL,
                     awaChannelName, importance);
             awarenessChannel.setDescription("Notification base on the capability of HMS Awareness Kit");
             manager.createNotificationChannel(awarenessChannel);
+
+            CharSequence serviceChannelName = "service channel";
+            NotificationChannel serviceChannel = new NotificationChannel(Constant.SERVICE_CHANNEL,
+                    serviceChannelName, NotificationManager.IMPORTANCE_NONE);
+            manager.createNotificationChannel(serviceChannel);
         }
     }
 
-    public static Notification buildAwarenessNotification(Context context, String title,
-                                                          String content, PendingIntent intent) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, AWARENESS_CHANNEL);
+    public static void sendAwarenessNotification(Context context, String title,
+                                                 String content, PendingIntent contentIntent) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constant.AWARENESS_CHANNEL);
         builder.setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(content)
-                .setContentIntent(intent)
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
-        return builder.build();
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        if (manager != null) {
+            manager.notify((int) System.currentTimeMillis(), builder.build());
+        }
     }
 
     public static Notification buildMusicNotification(Context context, MediaSessionCompat session) {
@@ -109,15 +115,4 @@ public class Utils {
         return builder.build();
     }
 
-    public static boolean getSPData(Context context, String key) {
-        SharedPreferences sp = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getBoolean(key, true);
-    }
-
-    public static void setSPData(Context context, String key, boolean value) {
-        SharedPreferences sp = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putBoolean(key, value);
-        editor.apply();
-    }
 }
