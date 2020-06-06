@@ -36,6 +36,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     private int mPlayListLength;
     private int mCurrentIndexOfList = 0;
     private boolean mIsFirstStart = true;
+    private boolean mIsFirstPreparedMusic = true;
 
     @Override
     public void onCreate() {
@@ -63,7 +64,18 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
             setMetadata(mPlayList.get(0));
             mIsFirstStart = false;
             updateNotification();
+            prepareMediaPlayer(mPlayList.get(mCurrentIndexOfList));
             MusicPositionLiveData.getInstance().checkPosition(mMediaPlayer);
+        } else {
+            String tag = intent.getStringExtra("MusicTag");
+            if (tag != null) {
+                for (int i = 0; i < mPlayListLength; i++) {
+                    if (mPlayList.get(i).getTag().equals(tag)) {
+                        mSessionCallback.onSkipToQueueItem(i);
+                        break;
+                    }
+                }
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -92,16 +104,12 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         @Override
         public void onPlay() {
             super.onPlay();
-            if (!dataSourceHasSet() && mPlayListLength > 0) {
-                prepareMediaPlayer(mPlayList.get(mCurrentIndexOfList));
-            } else {
-                mMediaPlayer.start();
-                mPlaybackStateCompat = new PlaybackStateCompat.Builder()
-                        .setState(PlaybackStateCompat.STATE_PLAYING, mMediaPlayer.getCurrentPosition(),
-                                1.0f).build();
-                mSession.setPlaybackState(mPlaybackStateCompat);
-                updateNotification();
-            }
+            mMediaPlayer.start();
+            mPlaybackStateCompat = new PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_PLAYING, mMediaPlayer.getCurrentPosition(),
+                            1.0f).build();
+            mSession.setPlaybackState(mPlaybackStateCompat);
+            updateNotification();
         }
 
         @Override
@@ -149,18 +157,23 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         @Override
         public void onSeekTo(long pos) {
             super.onSeekTo(pos);
-            if (dataSourceHasSet()) {
-                mMediaPlayer.seekTo((int) pos);
-                mPlaybackStateCompat = new PlaybackStateCompat.Builder()
-                        .setState(mPlaybackStateCompat.getState(), pos, 1.0f).build();
-                mSession.setPlaybackState(mPlaybackStateCompat);
-            }
+            mMediaPlayer.seekTo((int) pos);
+            mPlaybackStateCompat = new PlaybackStateCompat.Builder()
+                    .setState(mPlaybackStateCompat.getState(), pos, 1.0f).build();
+            mSession.setPlaybackState(mPlaybackStateCompat);
         }
 
         @Override
         public void onStop() {
             super.onStop();
             stopSelf();
+        }
+
+        @Override
+        public void onSkipToQueueItem(long id) {
+            super.onSkipToQueueItem(id);
+            mCurrentIndexOfList = (int) id;
+            prepareMediaPlayer(mPlayList.get(mCurrentIndexOfList));
         }
 
         @Override
@@ -187,6 +200,10 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        if (mIsFirstPreparedMusic) {
+            mIsFirstPreparedMusic = false;
+            return;
+        }
         mMediaPlayer.start();
         mPlaybackStateCompat = new PlaybackStateCompat.Builder()
                 .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f).build();
@@ -237,9 +254,4 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
                 .build();
         mSession.setMetadata(metadata);
     }
-
-    private boolean dataSourceHasSet() {
-        return mMediaPlayer.getDuration() > 0;
-    }
-
 }

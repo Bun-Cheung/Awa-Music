@@ -5,21 +5,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.awareness.music.entity.BarrierParamEntity;
 import com.huawei.hms.kit.awareness.Awareness;
 import com.huawei.hms.kit.awareness.barrier.AwarenessBarrier;
+import com.huawei.hms.kit.awareness.barrier.BarrierQueryRequest;
+import com.huawei.hms.kit.awareness.barrier.BarrierStatusMap;
 import com.huawei.hms.kit.awareness.barrier.BarrierUpdateRequest;
 import com.huawei.hms.kit.awareness.barrier.BluetoothBarrier;
 import com.huawei.hms.kit.awareness.barrier.HeadsetBarrier;
@@ -27,32 +26,25 @@ import com.huawei.hms.kit.awareness.status.BluetoothStatus;
 import com.huawei.hms.kit.awareness.status.HeadsetStatus;
 
 import java.util.List;
+import java.util.Set;
 
-public class SettingActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
-    private static final String IS_CHECKED_KEY = "key_scenarioCheckId";
-    private static final String RECOMMENDATION_CHECK_ID_KEY = "key_recommendationCheckId";
+public class SettingActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener {
     private final String TAG = getClass().getSimpleName();
-    private SharedPreferences mSP;
-    private boolean mCheckBoxIsChecked;
-    private int mRecommendationCheckId;
+    private CheckBox mHeadsetCheckBox;
+    private CheckBox mTimeCheckBox;
+    private CheckBox mBehaviorCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        mSP = getSharedPreferences(Constant.SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-        mCheckBoxIsChecked = mSP.getBoolean(IS_CHECKED_KEY, false);
-        mRecommendationCheckId = mSP.getInt(RECOMMENDATION_CHECK_ID_KEY, -1);
         initView();
+        queryBarrier();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences.Editor editor = mSP.edit();
-        editor.putBoolean(IS_CHECKED_KEY, mCheckBoxIsChecked);
-        editor.putInt(RECOMMENDATION_CHECK_ID_KEY, mRecommendationCheckId);
-        editor.apply();
     }
 
     private void initView() {
@@ -68,76 +60,114 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        CheckBox checkBox = findViewById(R.id.cb_isNotifyUser);
-        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!buttonView.isPressed()) {
-                return;
-            }
-            handleUserCheck(isChecked);
-        });
-        checkBox.setChecked(mCheckBoxIsChecked);
-        RadioGroup rgRecommendation = findViewById(R.id.rg_recommendation);
-        rgRecommendation.setOnCheckedChangeListener(this);
-        rgRecommendation.check(mRecommendationCheckId);
+        mHeadsetCheckBox = findViewById(R.id.cb_awareness_headset);
+        mHeadsetCheckBox.setOnCheckedChangeListener(this);
+        mTimeCheckBox = findViewById(R.id.cb_awareness_time);
+        mTimeCheckBox.setOnCheckedChangeListener(this);
+        mBehaviorCheckBox = findViewById(R.id.cb_awareness_behavior);
+        mBehaviorCheckBox.setOnCheckedChangeListener(this);
     }
 
     @Override
-    public void onCheckedChanged(RadioGroup group, int checkedId) {
-        RadioButton view = group.findViewById(checkedId);
-        if (view != null && !view.isPressed()) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!buttonView.isPressed()) {
             return;
         }
-        switch (checkedId) {
-
-        }
-    }
-
-    private void handleUserCheck(boolean isCheck) {
-        if (isCheck) {
-            AwarenessBarrier headsetBarrier = HeadsetBarrier.keeping(HeadsetStatus.CONNECTED);
-            int deviceType = 0;
-            AwarenessBarrier bluetoothBarrier = BluetoothBarrier.keep(deviceType, BluetoothStatus.CONNECTED);
-            AwarenessBarrier barrier = AwarenessBarrier.or(headsetBarrier, bluetoothBarrier);
-            Intent intent = new Intent(this, BarrierReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            addBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL, barrier, pendingIntent);
-            mCheckBoxIsChecked = true;
+        if (isChecked) {
+            addBarrier(buttonView.getId());
         } else {
-            //delete barrier
-            BarrierUpdateRequest request = new BarrierUpdateRequest.Builder().
-                    deleteBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL).build();
-            Awareness.getBarrierClient(this).updateBarriers(request)
-                    .addOnSuccessListener(aVoid -> Log.i(TAG, "delete headset barrier success"))
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "delete headset barrier failed", e);
-                        e.printStackTrace();
-                    });
-            mCheckBoxIsChecked = false;
+            deleteBarrier(buttonView.getId());
         }
     }
 
-    private void addBarrier(String label, AwarenessBarrier barrier, PendingIntent pendingIntent) {
+    private void addBarrier(int viewId) {
         BarrierUpdateRequest.Builder requestBuilder = new BarrierUpdateRequest.Builder();
-        requestBuilder.addBarrier(label, barrier, pendingIntent);
+        switch (viewId) {
+            case R.id.cb_awareness_headset:
+                AwarenessBarrier headsetBarrier = HeadsetBarrier.keeping(HeadsetStatus.CONNECTED);
+                int deviceType = 0;
+                AwarenessBarrier bluetoothBarrier = BluetoothBarrier.keep(deviceType, BluetoothStatus.CONNECTED);
+                AwarenessBarrier barrier = AwarenessBarrier.or(headsetBarrier, bluetoothBarrier);
+                Intent intent = new Intent(this, BarrierReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                requestBuilder.addBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL, barrier,
+                        pendingIntent);
+                break;
+            case R.id.cb_awareness_time:
+                List<BarrierParamEntity> timeBarrierList = MockData.getTimeBarrierList(this);
+                for (BarrierParamEntity entity : timeBarrierList) {
+                    requestBuilder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(),
+                            entity.getPendingIntent());
+                }
+                break;
+            case R.id.cb_awareness_behavior:
+                List<BarrierParamEntity> behaviorBarrierList = MockData.getBehaviorBarrierList(this);
+                for (BarrierParamEntity entity : behaviorBarrierList) {
+                    requestBuilder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(),
+                            entity.getPendingIntent());
+                }
+                break;
+            default:
+                break;
+        }
         Awareness.getBarrierClient(this).updateBarriers(requestBuilder.build())
-                .addOnSuccessListener(aVoid -> Log.i(TAG, "add barrier success"))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "setup success", Toast.LENGTH_SHORT).show();
+                })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "setup failed", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "add barrier failed", e);
+                    Log.e(TAG, "add barrier failed");
                     e.printStackTrace();
                 });
     }
 
-    private void addBatchBarrier(List<BarrierParamEntity> barrierList) {
-        BarrierUpdateRequest.Builder builder = new BarrierUpdateRequest.Builder();
-        for (BarrierParamEntity entity : barrierList) {
-            builder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(), entity.getPendingIntent());
-        }
-        Awareness.getBarrierClient(this).updateBarriers(builder.build())
-                .addOnSuccessListener(aVoid -> Log.i(TAG, "add barrier success"))
+    private void queryBarrier() {
+        BarrierQueryRequest request = BarrierQueryRequest.all();
+        Awareness.getBarrierClient(this).queryBarriers(request)
+                .addOnSuccessListener(barrierQueryResponse -> {
+                    BarrierStatusMap map = barrierQueryResponse.getBarrierStatusMap();
+                    Set<String> labelSet = map.getBarrierLabels();
+                    if (labelSet.contains(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL)) {
+                        mHeadsetCheckBox.setChecked(true);
+                    }
+                    if (labelSet.contains(Constant.MORNING_LABEL)) {
+                        mTimeCheckBox.setChecked(true);
+                    }
+                    if (labelSet.contains(Constant.RUNNING_LABEL)) {
+                        mBehaviorCheckBox.setChecked(true);
+                    }
+                })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "add barrier failed", e);
+                    Log.e(TAG, "query barrier failed");
+                    e.printStackTrace();
+                });
+    }
+
+
+    private void deleteBarrier(int viewId) {
+        BarrierUpdateRequest.Builder requestBuilder = new BarrierUpdateRequest.Builder();
+        switch (viewId) {
+            case R.id.cb_awareness_headset:
+                requestBuilder.deleteBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL);
+                break;
+            case R.id.cb_awareness_time:
+                for (BarrierParamEntity entity : MockData.getTimeBarrierList(this)) {
+                    requestBuilder.deleteBarrier(entity.getBarrierLabel());
+                }
+                break;
+            case R.id.cb_awareness_behavior:
+                for (BarrierParamEntity entity : MockData.getBehaviorBarrierList(this)) {
+                    requestBuilder.deleteBarrier(entity.getBarrierLabel());
+                }
+                break;
+            default:
+                break;
+        }
+        Awareness.getBarrierClient(this).updateBarriers(requestBuilder.build())
+                .addOnSuccessListener(aVoid -> Log.i(TAG, "delete barrier success"))
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "delete barrier failed");
                     e.printStackTrace();
                 });
     }

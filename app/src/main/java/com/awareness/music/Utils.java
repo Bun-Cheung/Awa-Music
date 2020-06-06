@@ -1,5 +1,6 @@
 package com.awareness.music;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -13,6 +14,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.core.app.NotificationCompat;
 import androidx.media.session.MediaButtonReceiver;
+
+import java.util.List;
 
 public class Utils {
     private static final String FOREGROUND_MUSIC_CHANNEL = "Music control channel";
@@ -115,4 +118,20 @@ public class Utils {
         return builder.build();
     }
 
+    public static boolean isMusicServiceRunning(Context context) {
+        ActivityManager manager = context.getSystemService(ActivityManager.class);
+        if (manager != null) {
+            String musicServiceName = MusicService.class.getName();
+            List<ActivityManager.RunningServiceInfo> list = manager.getRunningServices(100);
+            if (list.isEmpty()) {
+                return false;
+            }
+            for (ActivityManager.RunningServiceInfo info : list) {
+                if (info.service.getClassName().equals(musicServiceName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

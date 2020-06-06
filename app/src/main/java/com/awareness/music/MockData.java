@@ -26,11 +26,11 @@ class MockData {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        BarrierParamEntity morningBarrierEntity = new BarrierParamEntity(Constant.MORNING_BARRIER_LABEL,
+        BarrierParamEntity morningBarrierEntity = new BarrierParamEntity(Constant.MORNING_LABEL,
                 TimeBarrier.inTimeCategory(TimeBarrier.TIME_CATEGORY_MORNING), pendingIntent);
-        BarrierParamEntity afternoonBarrierEntity = new BarrierParamEntity(Constant.AFTERNOON_BARRIER_LABEL,
+        BarrierParamEntity afternoonBarrierEntity = new BarrierParamEntity(Constant.AFTERNOON_LABEL,
                 TimeBarrier.inTimeCategory(TimeBarrier.TIME_CATEGORY_AFTERNOON), pendingIntent);
-        BarrierParamEntity nightBarrierEntity = new BarrierParamEntity(Constant.NIGHT_BARRIER_LABEL,
+        BarrierParamEntity nightBarrierEntity = new BarrierParamEntity(Constant.NIGHT_LABEL,
                 TimeBarrier.inTimeCategory(TimeBarrier.TIME_CATEGORY_NIGHT), pendingIntent);
 
         timeBarrierList.add(morningBarrierEntity);
@@ -47,13 +47,13 @@ class MockData {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        BarrierParamEntity runningBarrierEntity = new BarrierParamEntity(Constant.RUNNING_BARRIER_LABEL,
+        BarrierParamEntity runningBarrierEntity = new BarrierParamEntity(Constant.RUNNING_LABEL,
                 BehaviorBarrier.keeping(BehaviorBarrier.BEHAVIOR_RUNNING), pendingIntent);
-        BarrierParamEntity onBicycleBarrierEntity = new BarrierParamEntity(Constant.ON_BICYCLE_BARRIER_LABEL,
+        BarrierParamEntity onBicycleBarrierEntity = new BarrierParamEntity(Constant.ON_BICYCLE_LABEL,
                 BehaviorBarrier.keeping(BehaviorBarrier.BEHAVIOR_ON_BICYCLE), pendingIntent);
-        BarrierParamEntity inVehicleBarrierEntity = new BarrierParamEntity(Constant.IN_VEHICLE_BARRIER_LABEL,
+        BarrierParamEntity inVehicleBarrierEntity = new BarrierParamEntity(Constant.IN_VEHICLE_LABEL,
                 BehaviorBarrier.keeping(BehaviorBarrier.BEHAVIOR_IN_VEHICLE), pendingIntent);
-        BarrierParamEntity walkingBarrierEntity = new BarrierParamEntity(Constant.WALKING_BARRIER_LABEL,
+        BarrierParamEntity walkingBarrierEntity = new BarrierParamEntity(Constant.WALKING_LABEL,
                 BehaviorBarrier.keeping(BehaviorBarrier.BEHAVIOR_WALKING), pendingIntent);
 
         behaviorBarrierList.add(runningBarrierEntity);
@@ -72,8 +72,23 @@ class MockData {
         Music music1 = new Music(context, uri1, R.drawable.cover_morning, "morning");
         Uri uri2 = resIdToUri(context, R.raw.autumn_sunset);
         Music music2 = new Music(context, uri2, R.drawable.cover_afternoon, "afternoon");
+        Uri uri3 = resIdToUri(context, R.raw.smooth_jazz_night);
+        Music music3 = new Music(context, uri3, R.drawable.cover_night, "night");
+        Uri uri4 = resIdToUri(context, R.raw.clap_along);
+        Music music4 = new Music(context, uri4, R.drawable.cover_running, "running");
+        Uri uri5 = resIdToUri(context, R.raw.there_you_go);
+        Music music5 = new Music(context, uri5, R.drawable.cover_in_vehicle, "in vehicle");
+        Uri uri6 = resIdToUri(context, R.raw.feels_good_to_be);
+        Music music6 = new Music(context, uri6, R.drawable.cover_walking, "walking");
+        Uri uri7 = resIdToUri(context, R.raw.in_the_field);
+        Music music7 = new Music(context, uri7, R.drawable.cover_cycling, "cycling");
         musicList.add(music1);
         musicList.add(music2);
+        musicList.add(music3);
+        musicList.add(music4);
+        musicList.add(music5);
+        musicList.add(music6);
+        musicList.add(music7);
         return musicList;
     }
 

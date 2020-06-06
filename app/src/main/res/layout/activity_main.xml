@@ -46,20 +46,20 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="100dp"
         android:scaleType="centerInside"
-        android:src="@drawable/cover_afternoon"
+        android:src="@drawable/cover_morning"
         app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/song_source"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="歌曲由XXX提供"
+        android:text="Music is supported by Audionautix.com"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cover" />
@@ -113,19 +113,19 @@
         android:src="@drawable/ic_play"
         app:layout_constraintHeight_max="50dp"
         app:layout_constraintLeft_toRightOf="@id/btn_previous"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintRight_toLeftOf="@id/btn_next"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/music_current_progress" />
+
     <ImageButton
         android:id="@+id/btn_next"
         style="@style/CustomImageButton"
-        android:src="@drawable/ic_next"
         android:layout_marginTop="25dp"
+        android:src="@drawable/ic_next"
         app:layout_constraintHeight_max="40dp"
-        app:layout_constraintTop_toBottomOf="@id/music_current_progress"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toRightOf="@id/btn_play"
-        />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/music_current_progress" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

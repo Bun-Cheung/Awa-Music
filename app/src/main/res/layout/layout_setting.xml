@@ -25,10 +25,8 @@
         app:layout_constraintTop_toBottomOf="@id/tv_scenario" />
 
     <CheckBox
-        android:id="@+id/cb_isNotifyUser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:id="@+id/cb_awareness_headset"
+        style="@style/CheckBoxStyle"
         android:text="耳机或车载蓝牙链接时弹出通知"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/first_divide" />
@@ -38,11 +36,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:text="音乐场景推荐"
+        android:text="根据场景推荐音乐"
         android:textColor="@color/colorBlack"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cb_isNotifyUser" />
+        app:layout_constraintTop_toBottomOf="@id/cb_awareness_headset" />
 
     <View
         android:id="@+id/second_divide"
@@ -52,24 +50,19 @@
         android:background="@color/divideColor"
         app:layout_constraintTop_toBottomOf="@id/tv_recommend_rule" />
 
-    <RadioGroup
-        android:id="@+id/rg_recommendation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        app:layout_constraintTop_toBottomOf="@id/second_divide">
+    <CheckBox
+        android:id="@+id/cb_awareness_time"
+        style="@style/CheckBoxStyle"
+        android:text="时间状态"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/second_divide" />
 
-        <RadioButton
-            android:id="@+id/rb_time_status"
-            style="@style/RadioButtonStyle"
-            android:checked="false"
-            android:text="时间状态" />
+    <CheckBox
+        android:id="@+id/cb_awareness_behavior"
+        style="@style/CheckBoxStyle"
+        android:text="活动状态"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cb_awareness_time" />
 
-        <RadioButton
-            android:id="@+id/rb_behavior_status"
-            style="@style/RadioButtonStyle"
-            android:checked="false"
-            android:text="活动状态" />
-    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
