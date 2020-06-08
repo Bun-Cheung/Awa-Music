@@ -5,11 +5,11 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/tv_scenario"
+        android:id="@+id/tv_headset_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="应用场景选择"
+        android:text="@string/headset_setting"
         android:textColor="@color/colorBlack"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -22,12 +22,12 @@
         android:layout_height="1dp"
         android:layout_marginTop="15dp"
         android:background="@color/divideColor"
-        app:layout_constraintTop_toBottomOf="@id/tv_scenario" />
+        app:layout_constraintTop_toBottomOf="@id/tv_headset_setting" />
 
     <CheckBox
         android:id="@+id/cb_awareness_headset"
         style="@style/CheckBoxStyle"
-        android:text="耳机或车载蓝牙链接时弹出通知"
+        android:text="@string/setting_headset_bluetooth_notification"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/first_divide" />
 
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:text="根据场景推荐音乐"
+        android:text="@string/setting_recommendation"
         android:textColor="@color/colorBlack"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -53,14 +53,14 @@
     <CheckBox
         android:id="@+id/cb_awareness_time"
         style="@style/CheckBoxStyle"
-        android:text="时间状态"
+        android:text="@string/setting_detect_time_status"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/second_divide" />
 
     <CheckBox
         android:id="@+id/cb_awareness_behavior"
         style="@style/CheckBoxStyle"
-        android:text="活动状态"
+        android:text="@string/setting_detect_behavior_status"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cb_awareness_time" />
 

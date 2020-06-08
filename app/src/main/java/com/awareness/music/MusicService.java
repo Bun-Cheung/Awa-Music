@@ -61,13 +61,13 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (mIsFirstStart && mPlayListLength > 0) {
-            setMetadata(mPlayList.get(0));
+            setMetadata(mPlayList.get(mCurrentIndexOfList));
             mIsFirstStart = false;
             updateNotification();
             prepareMediaPlayer(mPlayList.get(mCurrentIndexOfList));
             MusicPositionLiveData.getInstance().checkPosition(mMediaPlayer);
         } else {
-            String tag = intent.getStringExtra("MusicTag");
+            String tag = intent.getStringExtra(Constant.MUSIC_TAG);
             if (tag != null) {
                 for (int i = 0; i < mPlayListLength; i++) {
                     if (mPlayList.get(i).getTag().equals(tag)) {
@@ -91,6 +91,17 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     @Nullable
     @Override
     public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
+        if (rootHints != null) {
+            String tag = rootHints.getString(Constant.MUSIC_TAG);
+            if (tag != null) {
+                for (int i = 0; i < mPlayListLength; i++) {
+                    if (mPlayList.get(i).getTag().equals(tag)) {
+                        mCurrentIndexOfList = i;
+                        break;
+                    }
+                }
+            }
+        }
         return new BrowserRoot("Awa-Music", null);
     }
 
@@ -172,6 +183,9 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         @Override
         public void onSkipToQueueItem(long id) {
             super.onSkipToQueueItem(id);
+            if (id < 0 || id > mPlayListLength - 1) {
+                return;
+            }
             mCurrentIndexOfList = (int) id;
             prepareMediaPlayer(mPlayList.get(mCurrentIndexOfList));
         }

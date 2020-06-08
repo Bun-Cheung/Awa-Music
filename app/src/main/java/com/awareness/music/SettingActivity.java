@@ -1,12 +1,17 @@
 package com.awareness.music;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -30,9 +35,11 @@ import java.util.Set;
 
 public class SettingActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener {
     private final String TAG = getClass().getSimpleName();
+    private final int PERMISSIONS_REQUEST_CODE = 940;
     private CheckBox mHeadsetCheckBox;
     private CheckBox mTimeCheckBox;
     private CheckBox mBehaviorCheckBox;
+    private BarrierUpdateRequest.Builder mRequestBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,15 +81,16 @@ public class SettingActivity extends AppCompatActivity implements CheckBox.OnChe
             return;
         }
         if (isChecked) {
-            addBarrier(buttonView.getId());
+            addBarrier(buttonView);
         } else {
-            deleteBarrier(buttonView.getId());
+            deleteBarrier(buttonView);
         }
     }
 
-    private void addBarrier(int viewId) {
-        BarrierUpdateRequest.Builder requestBuilder = new BarrierUpdateRequest.Builder();
-        switch (viewId) {
+    private void addBarrier(CompoundButton buttonView) {
+        mRequestBuilder = new BarrierUpdateRequest.Builder();
+        boolean permissionHasGranted = true;
+        switch (buttonView.getId()) {
             case R.id.cb_awareness_headset:
                 AwarenessBarrier headsetBarrier = HeadsetBarrier.keeping(HeadsetStatus.CONNECTED);
                 int deviceType = 0;
@@ -91,35 +99,46 @@ public class SettingActivity extends AppCompatActivity implements CheckBox.OnChe
                 Intent intent = new Intent(this, BarrierReceiver.class);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1,
                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                requestBuilder.addBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL, barrier,
+                mRequestBuilder.addBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL, barrier,
                         pendingIntent);
                 break;
             case R.id.cb_awareness_time:
+                permissionHasGranted = checkPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
                 List<BarrierParamEntity> timeBarrierList = MockData.getTimeBarrierList(this);
                 for (BarrierParamEntity entity : timeBarrierList) {
-                    requestBuilder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(),
+                    mRequestBuilder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(),
                             entity.getPendingIntent());
                 }
                 break;
             case R.id.cb_awareness_behavior:
+                String[] permissions;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    permissions = new String[]{Manifest.permission.ACTIVITY_RECOGNITION};
+                } else {
+                    permissions = new String[]{"com.huawei.hms.permission.ACTIVITY_RECOGNITION"};
+                }
+                permissionHasGranted = checkPermissions(permissions);
                 List<BarrierParamEntity> behaviorBarrierList = MockData.getBehaviorBarrierList(this);
                 for (BarrierParamEntity entity : behaviorBarrierList) {
-                    requestBuilder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(),
+                    mRequestBuilder.addBarrier(entity.getBarrierLabel(), entity.getBarrier(),
                             entity.getPendingIntent());
                 }
                 break;
             default:
                 break;
         }
-        Awareness.getBarrierClient(this).updateBarriers(requestBuilder.build())
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "setup success", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "setup failed", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "add barrier failed");
-                    e.printStackTrace();
-                });
+        if (permissionHasGranted) {
+            Awareness.getBarrierClient(this).updateBarriers(mRequestBuilder.build())
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "setup success", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "setup failed", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "add barrier failed");
+                        e.printStackTrace();
+                        buttonView.setChecked(false);
+                    });
+        }
     }
 
     private void queryBarrier() {
@@ -145,9 +164,9 @@ public class SettingActivity extends AppCompatActivity implements CheckBox.OnChe
     }
 
 
-    private void deleteBarrier(int viewId) {
+    private void deleteBarrier(CompoundButton buttonView) {
         BarrierUpdateRequest.Builder requestBuilder = new BarrierUpdateRequest.Builder();
-        switch (viewId) {
+        switch (buttonView.getId()) {
             case R.id.cb_awareness_headset:
                 requestBuilder.deleteBarrier(Constant.HEADSET_BLUETOOTH_BARRIER_LABEL);
                 break;
@@ -169,6 +188,45 @@ public class SettingActivity extends AppCompatActivity implements CheckBox.OnChe
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "delete barrier failed");
                     e.printStackTrace();
+                    buttonView.setChecked(true);
                 });
+    }
+
+    private boolean checkPermissions(String[] permissions) {
+        boolean result = true;
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                result = false;
+            }
+        }
+        ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST_CODE);
+        return result;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean permissionDenied = false;
+        if (requestCode == PERMISSIONS_REQUEST_CODE) {
+            for (int result : grantResults) {
+                if (result == PackageManager.PERMISSION_DENIED) {
+                    permissionDenied = true;
+                    break;
+                }
+            }
+            if (permissionDenied) {
+                Toast.makeText(this, "grant permission failed", Toast.LENGTH_SHORT).show();
+            } else {
+                Awareness.getBarrierClient(this).updateBarriers(mRequestBuilder.build())
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(this, "Setup success", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this, "Setup Failed", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        });
+            }
+        }
     }
 }

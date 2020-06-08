@@ -20,43 +20,78 @@ public class BarrierReceiver extends BroadcastReceiver {
             Log.i(TAG, barrierLabel + "barrier status is false or unknown");
             return;
         }
+        Log.i(TAG, "barrier status is true");
         String title, content;
-        Intent contentIntent;
         PendingIntent pendingIntent;
         switch (barrierLabel) {
             case Constant.HEADSET_BLUETOOTH_BARRIER_LABEL:
-                contentIntent = new Intent(context, MainActivity.class);
-                title = "Awareness Kit感知到耳机或车载蓝牙链接";
-                content = "点击打开Awa-Music";
+                Intent contentIntent = new Intent(context, MainActivity.class);
+                title = "Headset or bluetooth car stereo is connected.";
+                content = "click to open Awa-Music";
                 pendingIntent = PendingIntent.getActivity(context, 2,
                         contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 Utils.sendAwarenessNotification(context, title, content, pendingIntent);
                 break;
             case Constant.MORNING_LABEL:
-                contentIntent = new Intent(context, MainActivity.class);
-                title = "Awareness Kit感知现在是早上";
-                content = "点击打开Awa-Music";
-                pendingIntent = PendingIntent.getActivity(context, 2,
-                        contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                title = "It's morning now";
+                content = "Enjoy the music in the morning";
+                pendingIntent = buildPendingIntent(context, Constant.MORNING_LABEL);
                 Utils.sendAwarenessNotification(context, title, content, pendingIntent);
                 break;
             case Constant.AFTERNOON_LABEL:
-                if (Utils.isMusicServiceRunning(context)) {
-                    contentIntent = new Intent(context, MusicService.class);
-                    contentIntent.putExtra("MusicTag", "afternoon");
-                    pendingIntent = PendingIntent.getService(context, 2, contentIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-                } else {
-                    contentIntent = new Intent(context, MainActivity.class);
-                    pendingIntent = PendingIntent.getActivity(context, 2,
-                            contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                }
-                title = "Awareness Kit感知现在是下午";
-                content = "点击打开Awa-Music";
+                title = "It's afternoon now";
+                content = "Enjoy the music in the afternoon";
+                pendingIntent = buildPendingIntent(context, Constant.AFTERNOON_LABEL);
+                Utils.sendAwarenessNotification(context, title, content, pendingIntent);
+                break;
+            case Constant.NIGHT_LABEL:
+                title = "It's night";
+                content = "Enjoy the music at night";
+                pendingIntent = buildPendingIntent(context, Constant.NIGHT_LABEL);
+                Utils.sendAwarenessNotification(context, title, content, pendingIntent);
+                break;
+            case Constant.RUNNING_LABEL:
+                title = "It's running";
+                content = "Enjoy the music for running";
+                pendingIntent = buildPendingIntent(context, Constant.RUNNING_LABEL);
+                Utils.sendAwarenessNotification(context, title, content, pendingIntent);
+                break;
+            case Constant.IN_VEHICLE_LABEL:
+                title = "It's in vehicle";
+                content = "Enjoy the music in vehicle";
+                pendingIntent = buildPendingIntent(context, Constant.IN_VEHICLE_LABEL);
+                Utils.sendAwarenessNotification(context, title, content, pendingIntent);
+                break;
+            case Constant.ON_BICYCLE_LABEL:
+                title = "It's on bicycle";
+                content = "Enjoy the music for cycling";
+                pendingIntent = buildPendingIntent(context, Constant.ON_BICYCLE_LABEL);
+                Utils.sendAwarenessNotification(context, title, content, pendingIntent);
+                break;
+            case Constant.WALKING_LABEL:
+                title = "It's walking";
+                content = "Enjoy the music for walking";
+                pendingIntent = buildPendingIntent(context, Constant.WALKING_LABEL);
                 Utils.sendAwarenessNotification(context, title, content, pendingIntent);
                 break;
             default:
                 break;
+        }
+    }
+
+
+    private PendingIntent buildPendingIntent(Context context, String label) {
+        Intent contentIntent;
+        if (Utils.isMusicServiceRunning(context)) {
+            contentIntent = new Intent(context, MusicService.class);
+            contentIntent.putExtra(Constant.MUSIC_TAG, label);
+            return PendingIntent.getService(context, 2, contentIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            contentIntent = new Intent(context, MainActivity.class);
+            contentIntent.putExtra(Constant.MUSIC_TAG, label);
+            return PendingIntent.getActivity(context, 2, contentIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
         }
     }
 }

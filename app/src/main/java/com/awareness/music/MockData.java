@@ -47,6 +47,7 @@ class MockData {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
+        //create Barrier to detect running,cycling,in vehicle,walking status
         BarrierParamEntity runningBarrierEntity = new BarrierParamEntity(Constant.RUNNING_LABEL,
                 BehaviorBarrier.keeping(BehaviorBarrier.BEHAVIOR_RUNNING), pendingIntent);
         BarrierParamEntity onBicycleBarrierEntity = new BarrierParamEntity(Constant.ON_BICYCLE_LABEL,
@@ -69,19 +70,19 @@ class MockData {
             return musicList;
         }
         Uri uri1 = resIdToUri(context, R.raw.mornings);
-        Music music1 = new Music(context, uri1, R.drawable.cover_morning, "morning");
+        Music music1 = new Music(context, uri1, R.drawable.cover_morning, Constant.MORNING_LABEL);
         Uri uri2 = resIdToUri(context, R.raw.autumn_sunset);
-        Music music2 = new Music(context, uri2, R.drawable.cover_afternoon, "afternoon");
+        Music music2 = new Music(context, uri2, R.drawable.cover_afternoon, Constant.AFTERNOON_LABEL);
         Uri uri3 = resIdToUri(context, R.raw.smooth_jazz_night);
-        Music music3 = new Music(context, uri3, R.drawable.cover_night, "night");
+        Music music3 = new Music(context, uri3, R.drawable.cover_night, Constant.NIGHT_LABEL);
         Uri uri4 = resIdToUri(context, R.raw.clap_along);
-        Music music4 = new Music(context, uri4, R.drawable.cover_running, "running");
+        Music music4 = new Music(context, uri4, R.drawable.cover_running, Constant.RUNNING_LABEL);
         Uri uri5 = resIdToUri(context, R.raw.there_you_go);
-        Music music5 = new Music(context, uri5, R.drawable.cover_in_vehicle, "in vehicle");
+        Music music5 = new Music(context, uri5, R.drawable.cover_in_vehicle, Constant.IN_VEHICLE_LABEL);
         Uri uri6 = resIdToUri(context, R.raw.feels_good_to_be);
-        Music music6 = new Music(context, uri6, R.drawable.cover_walking, "walking");
+        Music music6 = new Music(context, uri6, R.drawable.cover_walking, Constant.WALKING_LABEL);
         Uri uri7 = resIdToUri(context, R.raw.in_the_field);
-        Music music7 = new Music(context, uri7, R.drawable.cover_cycling, "cycling");
+        Music music7 = new Music(context, uri7, R.drawable.cover_cycling, Constant.ON_BICYCLE_LABEL);
         musicList.add(music1);
         musicList.add(music2);
         musicList.add(music3);

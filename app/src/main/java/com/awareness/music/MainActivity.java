@@ -50,8 +50,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             showFirstUseDialog();
             setSPData(IS_FIRST_USE_KEY, false);
         }
+        String musicTag = getIntent().getStringExtra(Constant.MUSIC_TAG);
+        Bundle bundle = null;
+        if (musicTag != null) {
+            bundle = new Bundle();
+            bundle.putString(Constant.MUSIC_TAG, musicTag);
+        }
         mMediaBrowser = new MediaBrowserCompat(this,
-                new ComponentName(this, MusicService.class), mConnectionCallback, null);
+                new ComponentName(this, MusicService.class), mConnectionCallback, bundle);
         mMediaBrowser.connect();
         MusicPositionLiveData.getInstance().getCurrentPosition().observe(this, integer -> {
             mSeekbar.setProgress(integer);
@@ -191,14 +197,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void showFirstUseDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("首次设置");
-        builder.setMessage("首次使用，建议设置个性化音乐场景");
-        builder.setPositiveButton("设置", (dialog, which) -> {
+        builder.setTitle("Initial Setting");
+        builder.setMessage("Go to Setting page to setup music recommendation config");
+        builder.setPositiveButton("setting", (dialog, which) -> {
             Intent intent = new Intent(this, SettingActivity.class);
             startActivity(intent);
             dialog.dismiss();
         });
-        builder.setNegativeButton("取消", (dialog, which) -> {
+        builder.setNegativeButton("cancel", (dialog, which) -> {
             dialog.dismiss();
         });
         AlertDialog alertDialog = builder.create();

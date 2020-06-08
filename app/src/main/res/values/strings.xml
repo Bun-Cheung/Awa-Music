@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Awa-Music</string>
+    <string name="music_support">Music is supported by Audionautix.com</string>
+    <string name="time_zero">0:00</string>
+    <string name="headset_setting">Headset setting</string>
+    <string name="setting_headset_bluetooth_notification">Send notification when Headset or bluetooth car stereo is connected </string>
+    <string name="setting_recommendation">Recommend music based on scenarios</string>
+    <string name="setting_detect_time_status">Time status</string>
+    <string name="setting_detect_behavior_status">Behavior status</string>
 </resources>

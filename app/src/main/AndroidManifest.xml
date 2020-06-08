@@ -23,7 +23,6 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <service android:name=".BarrierService" />
 
         <activity
             android:name=".SettingActivity"

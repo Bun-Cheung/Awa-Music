@@ -14,7 +14,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:text="Hello World!"
         android:textColor="@color/colorBlack"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -25,7 +24,6 @@
         android:id="@+id/music_artist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Alex"
         android:textSize="14sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -59,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Music is supported by Audionautix.com"
+        android:text="@string/music_support"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cover" />
@@ -82,7 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:text="01:12"
+        android:text="@string/time_zero"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/music_seek_bar" />
 
@@ -92,7 +90,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:text="03:42"
+        android:text="@string/time_zero"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/music_seek_bar" />
 
